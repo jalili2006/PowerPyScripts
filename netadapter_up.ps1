@@ -10,7 +10,21 @@ Get-NetAdapter |
 Where-Object { $_.Status -eq 'Up' -and $_.InterfaceDescription -like '*Ethernet*' } |
 Select-Object ifIndex, Name, Status, MacAddress, LinkSpeed
 
-
+# ...existing code...
+Get-NetAdapter |
+Where-Object { $_.Status -eq 'Up' -and $_.InterfaceDescription -like '*Ethernet*' } |
+ForEach-Object {
+    $ip = (Get-NetIPAddress -InterfaceIndex $_.ifIndex -AddressFamily IPv4 | Select-Object -ExpandProperty IPAddress)
+    [PSCustomObject]@{
+        ifIndex    = $_.ifIndex
+        Name       = $_.Name
+        Status     = $_.Status
+        MacAddress = $_.MacAddress
+        LinkSpeed  = $_.LinkSpeed
+        IPv4       = $ip -join ', '
+    }
+}
+# ...existing code...
 # Show only Ethernet adapters that are up, with key properties and IP summary
 $adapters = Get-NetAdapter |
 Where-Object { $_.Status -eq 'Up' -and $_.InterfaceDescription -like '*Ethernet*' }
@@ -19,6 +33,9 @@ Where-Object { $_.Status -eq 'Up' -and $_.InterfaceDescription -like '*Ethernet*
 # You can find the ifIndex by running the command from line 6: Get-NetAdapter | Select-Object ifIndex,Name
 # Replace '15' with the actual ifIndex you want to query.
 Get-NetAdapter -ifIndex 15 
+
+<#
+
 
 foreach ($adapter in $adapters) {
     $info = [PSCustomObject]@{
@@ -32,3 +49,29 @@ foreach ($adapter in $adapters) {
     $info
 }
 
+#>
+$adapters = Get-NetAdapter
+
+foreach ($adapter in $adapters) {
+    if ($adapter.Status -eq 'Up' -and $adapter.InterfaceDescription -like '*Ethernet*') {
+        # Do something with the adapter, e.g. select properties
+        $adapter | Select-Object ifIndex, Name, Status, MacAddress, LinkSpeed
+    }
+}
+
+
+# ...existing code...
+Get-NetAdapter |
+Where-Object { $_.Status -eq 'Up' -and $_.InterfaceDescription -like '*Ethernet*' } |
+ForEach-Object {
+    $ip = (Get-NetIPAddress -InterfaceIndex $_.ifIndex -AddressFamily IPv4 | Select-Object -ExpandProperty IPAddress)
+    [PSCustomObject]@{
+        ifIndex    = $_.ifIndex
+        Name       = $_.Name
+        Status     = $_.Status
+        MacAddress = $_.MacAddress
+        LinkSpeed  = $_.LinkSpeed
+        IPv4       = $ip -join ', '
+    }
+}
+# ...existing code...
